@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PhishShield — Real-Time Phishing Detector</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+
+  <!-- ── Grid Overlay ──────────────────────────────────────────────────────── -->
+  <div class="grid-overlay" aria-hidden="true"></div>
+  <div class="noise-overlay" aria-hidden="true"></div>
+
+  <!-- ── Header ────────────────────────────────────────────────────────────── -->
+  <header class="site-header">
+    <div class="logo">
+      <span class="logo-icon">⚡</span>
+      <span class="logo-text">PHISH<span class="logo-accent">SHIELD</span></span>
+    </div>
+    <nav class="header-nav">
+      <span class="nav-tag">v1.0</span>
+      <span class="nav-tag">Real-Time</span>
+      <span class="nav-tag live-dot">LIVE</span>
+    </nav>
+  </header>
+
+  <!-- ── Hero ──────────────────────────────────────────────────────────────── -->
+  <main class="main-content">
+    <section class="hero">
+      <p class="hero-eyebrow">// CYBERSECURITY INTELLIGENCE</p>
+      <h1 class="hero-title">
+        Detect<br/>
+        <span class="title-stroke">Phishing</span><br/>
+        Instantly.
+      </h1>
+      <p class="hero-sub">
+        Multi-layer analysis · URL heuristics · SSL inspection ·
+        WHOIS intelligence · VirusTotal threat data · ML prediction
+      </p>
+    </section>
+
+    <!-- ── Scan Form ──────────────────────────────────────────────────────── -->
+    <section class="scan-section">
+      <div class="scan-card">
+        <label class="scan-label" for="urlInput">// ENTER URL TO ANALYSE</label>
+        <div class="input-row">
+          <div class="input-wrapper">
+            <span class="input-prefix">https://</span>
+            <input
+              id="urlInput"
+              type="text"
+              class="url-input"
+              placeholder="example.com or paste full URL"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              spellcheck="false"
+            />
+          </div>
+          <button id="scanBtn" class="scan-btn" onclick="startScan()">
+            <span class="btn-text">SCAN</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </div>
+        <div id="errorMsg" class="error-msg" role="alert" aria-live="polite"></div>
+
+        <!-- Quick examples -->
+        <div class="quick-examples">
+          <span class="ql">Try:</span>
+          <button class="ql-btn" onclick="fillExample('https://google.com')">google.com</button>
+          <button class="ql-btn" onclick="fillExample('http://paypal-secure-update.xyz/confirm')">paypal-secure-update.xyz</button>
+          <button class="ql-btn" onclick="fillExample('http://192.168.1.1/login')">IP login page</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Loading ────────────────────────────────────────────────────────── -->
+    <section id="loadingSection" class="loading-section hidden" aria-live="polite">
+      <div class="loading-card">
+        <div class="pulse-ring"></div>
+        <div class="loading-steps">
+          <div class="lstep" id="ls1">⬡ Analysing URL patterns…</div>
+          <div class="lstep" id="ls2">⬡ Verifying SSL certificate…</div>
+          <div class="lstep" id="ls3">⬡ Querying WHOIS records…</div>
+          <div class="lstep" id="ls4">⬡ Scanning threat intelligence…</div>
+          <div class="lstep" id="ls5">⬡ Running ML classifier…</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Results ────────────────────────────────────────────────────────── -->
+    <section id="resultSection" class="result-section hidden">
+
+      <!-- Verdict Banner -->
+      <div id="verdictBanner" class="verdict-banner">
+        <div class="verdict-emoji" id="verdictEmoji"></div>
+        <div class="verdict-info">
+          <div class="verdict-label" id="verdictLabel"></div>
+          <div class="verdict-url" id="verdictUrl"></div>
+        </div>
+        <div class="verdict-score-wrap">
+          <div class="verdict-score" id="verdictScore"></div>
+          <div class="verdict-score-label">RISK SCORE</div>
+          <div class="verdict-confidence" id="verdictConfidence"></div>
+        </div>
+      </div>
+
+      <!-- Score Bar -->
+      <div class="score-bar-wrap">
+        <div class="score-bar-track">
+          <div class="score-bar-fill" id="scoreBarFill"></div>
+          <div class="score-bar-markers">
+            <span style="left:30%">30</span>
+            <span style="left:60%">60</span>
+          </div>
+        </div>
+        <div class="score-bar-labels">
+          <span class="sbl safe">SAFE</span>
+          <span class="sbl suspicious">SUSPICIOUS</span>
+          <span class="sbl phishing">PHISHING</span>
+        </div>
+      </div>
+
+      <!-- Module Grid -->
+      <div class="modules-grid">
+
+        <div class="module-card" id="modUrl">
+          <div class="mod-header">
+            <span class="mod-icon">🔗</span>
+            <span class="mod-title">URL ANALYSIS</span>
+            <span class="mod-score" id="scoreUrl"></span>
+          </div>
+          <ul class="mod-flags" id="flagsUrl"></ul>
+        </div>
+
+        <div class="module-card" id="modSsl">
+          <div class="mod-header">
+            <span class="mod-icon">🔒</span>
+            <span class="mod-title">SSL CERTIFICATE</span>
+            <span class="mod-score" id="scoreSsl"></span>
+          </div>
+          <ul class="mod-flags" id="flagsSsl"></ul>
+        </div>
+
+        <div class="module-card" id="modWhois">
+          <div class="mod-header">
+            <span class="mod-icon">🌐</span>
+            <span class="mod-title">WHOIS DOMAIN</span>
+            <span class="mod-score" id="scoreWhois"></span>
+          </div>
+          <ul class="mod-flags" id="flagsWhois"></ul>
+          <div class="mod-details" id="detailsWhois"></div>
+        </div>
+
+        <div class="module-card" id="modApi">
+          <div class="mod-header">
+            <span class="mod-icon">🛡️</span>
+            <span class="mod-title">THREAT INTEL</span>
+            <span class="mod-score" id="scoreApi"></span>
+          </div>
+          <ul class="mod-flags" id="flagsApi"></ul>
+          <div class="mod-details" id="detailsApi"></div>
+        </div>
+
+        <div class="module-card" id="modMl">
+          <div class="mod-header">
+            <span class="mod-icon">🤖</span>
+            <span class="mod-title">ML CLASSIFIER</span>
+            <span class="mod-score" id="scoreMl"></span>
+          </div>
+          <ul class="mod-flags" id="flagsMl"></ul>
+        </div>
+
+        <div class="module-card breakdown-card" id="modBreakdown">
+          <div class="mod-header">
+            <span class="mod-icon">📊</span>
+            <span class="mod-title">SCORE BREAKDOWN</span>
+          </div>
+          <div class="breakdown-bars" id="breakdownBars"></div>
+          <div class="scan-meta" id="scanMeta"></div>
+        </div>
+
+      </div>
+
+      <!-- Scan Again -->
+      <div class="scan-again-row">
+        <button class="scan-again-btn" onclick="resetScan()">← SCAN ANOTHER URL</button>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- ── Footer ────────────────────────────────────────────────────────────── -->
+  <footer class="site-footer">
+    <span>PhishShield © 2025</span>
+    <span>// Multi-layer phishing detection engine</span>
+    <span>Built on Flask · scikit-learn · VirusTotal API</span>
+  </footer>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
