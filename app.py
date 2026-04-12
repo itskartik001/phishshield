@@ -207,6 +207,11 @@ def health():
     return jsonify({"status": "ok", "service": "PhishShield"}), 200
 
 
+@app.route("/favicon.ico")
+def favicon():
+    return "", 204
+
+
 # ── Error handlers ─────────────────────────────────────────────────────────────
 
 @app.errorhandler(404)

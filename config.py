@@ -21,7 +21,7 @@ GOOGLE_SAFE_BROWSING_URL = (
 
 # ─── Application ──────────────────────────────────────────────────────────────
 DEBUG          = os.environ.get("FLASK_DEBUG", "False").lower() == "true"
-PORT           = int(os.environ.get("PORT", 5001))
+PORT           = int(os.environ.get("PORT", 5000))
 HOST           = os.environ.get("HOST", "0.0.0.0")
 SECRET_KEY     = os.environ.get("SECRET_KEY", "phishshield-dev-key-change-in-prod")
 
